@@ -6,7 +6,7 @@ public class ApplicationSettings : MonoBehaviour
 {
     private void Awake()
     {
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 144;
         QualitySettings.vSyncCount = 0;
     }
    

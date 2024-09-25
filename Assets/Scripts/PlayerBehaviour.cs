@@ -8,6 +8,7 @@ public class PlayerBehaviour : MonoBehaviour
 {
     public event Action<bool> OnColorCollect;
     public event Action OnColorChangeCaution;
+    public event Action OnColorChanged;
 
     [SerializeField] private float colorChangeDelay = 5f;
     [SerializeField] private ColorsListSO colorsList;
@@ -43,13 +44,13 @@ public class PlayerBehaviour : MonoBehaviour
         sprite = GetComponentInChildren<SpriteRenderer>();
 
         targetPosition = transform.position;
-    }
-    private void Start()
-    {
+
         // Sets random color type on awake
         currentColor = newColor = colorsList.list[UnityEngine.Random.Range(0, colorsList.list.Count - 1)];
         sprite.color = currentColor.color;
-
+    }
+    private void Start()
+    {
         StartCoroutine(ColorChangeCoroutine());
 
         // Stops detecting collisions when game is over
@@ -112,7 +113,13 @@ public class PlayerBehaviour : MonoBehaviour
                 sprite.color = currentColor.color;
 
                 SoundsHandler.PlaySFX(ColorChangeSFX, 1f);
+                OnColorChanged?.Invoke();
             }
         }
+    }
+
+    public ColorSO GetColor()
+    {
+        return currentColor;
     }
 }

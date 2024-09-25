@@ -14,6 +14,8 @@ public class UIMainMenu : MonoBehaviour
     [SerializeField] private Button exitBtn;
     [Header("SFX")]
     [SerializeField] private AudioClip uiSFX;
+    [SerializeField] private AudioClip playSFX;
+    [SerializeField] private AudioClip exitSFX;
     [Header("Other")]
     [SerializeField] private UIMenuSettingsPanel settings;
 
@@ -21,11 +23,20 @@ public class UIMainMenu : MonoBehaviour
     {
         // Setting highest score amount
         highScoreTxt.SetText(HighscoreHandler.GetHighScore().ToString());
-
+    }
+    private void Start()
+    {
+        InitializeButtons();
+    }
+    private void InitializeButtons()
+    {
         // Play button behaviour
         playBtn.onClick.AddListener(() =>
         {
-            GameSceneLoader.LoadScene(GameSceneLoader.Scenes.GameScene);
+            SoundsHandler.PlaySFX(playSFX, 1f);
+            UILoadingScreen.Instance.PlayLoadIn();
+            MusicManager.Instance.TurnOffVolume();
+            Invoke("PlayButton", 1f);
         });
 
         // Settings button behaviour
@@ -38,7 +49,18 @@ public class UIMainMenu : MonoBehaviour
         // Exit button behaviour
         exitBtn.onClick.AddListener(() =>
         {
-            Application.Quit();
+            SoundsHandler.PlaySFX(exitSFX, 1f);
+            UILoadingScreen.Instance.PlayLoadIn();
+            MusicManager.Instance.TurnOffVolume();
+            Invoke("ExitButton", 1f);
         });
+    }
+    private void PlayButton()
+    {
+        GameSceneLoader.LoadScene(GameSceneLoader.Scenes.GameScene);
+    }
+    private void ExitButton()
+    {
+        Application.Quit();
     }
 }
