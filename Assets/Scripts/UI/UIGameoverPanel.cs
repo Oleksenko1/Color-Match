@@ -12,6 +12,7 @@ public class UIGameoverPanel : MonoBehaviour
     [SerializeField] private Button toMenuBtn;
     [Header("Texts")]
     [SerializeField] private TextMeshProUGUI scoreAmountText;
+    [SerializeField] private GameObject newRecordText;
     [Header("SFX")]
     [SerializeField] private AudioClip playSFX;
     [SerializeField] private AudioClip toMenuSFX;
@@ -19,13 +20,15 @@ public class UIGameoverPanel : MonoBehaviour
     [Inject] private UITimer timerScript;
     [Inject] private UIScore scoreScript;
 
+    private bool isNewRecord = false;
     private void Start()
     {
         timerScript.OnGameOver += ShowPanel;
 
-        gameObject.SetActive(false);
-
         InitializeButtons();
+
+        gameObject.SetActive(false);
+        newRecordText.SetActive(false);
     }
     private void InitializeButtons()
     {
@@ -55,7 +58,12 @@ public class UIGameoverPanel : MonoBehaviour
         scoreAmountText.SetText(currentScore.ToString());
 
         // Sets high score
-        if(currentScore > HighscoreHandler.GetHighScore()) { HighscoreHandler.SetHighscore(currentScore); }
+        if(currentScore > HighscoreHandler.GetHighScore()) 
+        { 
+            HighscoreHandler.SetHighscore(currentScore);
+            isNewRecord = true;
+            newRecordText.SetActive(true);
+        }
 
         gameObject.SetActive(true);
     }
@@ -66,5 +74,9 @@ public class UIGameoverPanel : MonoBehaviour
     private void RestartButton()
     {
         GameSceneLoader.LoadScene(GameSceneLoader.Scenes.GameScene);
+    }
+    public bool IsNewRecord()
+    {
+        return isNewRecord;
     }
 }
