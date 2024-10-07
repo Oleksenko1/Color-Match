@@ -6,6 +6,7 @@ using Zenject;
 
 public class UIScore : MonoBehaviour
 {
+    public static UIScore Instance;
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private int scoreIncrease;
     [SerializeField] private int scoreReduce;
@@ -15,6 +16,11 @@ public class UIScore : MonoBehaviour
 
     private int currentScore = 0;
 
+    private bool isMultiplied = false;
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
         SetText();
@@ -25,7 +31,8 @@ public class UIScore : MonoBehaviour
     {
         if (isRightColor)
         {
-            currentScore += scoreIncrease;
+            int addScore = isMultiplied ? scoreIncrease * 3 : scoreIncrease;
+            currentScore += addScore;
         }
         else
         {
@@ -41,6 +48,9 @@ public class UIScore : MonoBehaviour
     {
         text.SetText(currentScore.ToString());
     }
-
+    public void SetMultipliying(bool b)
+    {
+        isMultiplied = b;
+    }
     public int GetScore() { return currentScore; }
 }

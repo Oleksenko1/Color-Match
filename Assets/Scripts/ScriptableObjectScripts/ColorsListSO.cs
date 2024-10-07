@@ -6,4 +6,5 @@ using UnityEngine;
 public class ColorsListSO : ScriptableObject
 {
     public List<ColorSO> list;
+    public ColorSO rainbowColor;
 }

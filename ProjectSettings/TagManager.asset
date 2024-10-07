@@ -4,17 +4,17 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - ship
-  - asteroid
+  - Shapes
+  - Buff
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
   - Shapes
-  - 
+  - PlayerIgnor
   - 
   - 
   - 

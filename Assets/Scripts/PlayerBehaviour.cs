@@ -13,7 +13,6 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField] private float colorChangeDelay = 5f;
     [SerializeField] private ColorsListSO colorsList;
     [Space(10)]
-    [SerializeField] private RectTransform canvas;
     [SerializeField] private float borderOffset = -0.4f;
     [Header("SFX")]
     [SerializeField] private AudioClip ColorChangeSFX;
@@ -21,6 +20,8 @@ public class PlayerBehaviour : MonoBehaviour
     [SerializeField] private AudioClip WrongCollectSFX;
     [Header("VFX")]
     [SerializeField] private GameObject colorChangeVFX;
+    [Header("Other")]
+    [SerializeField] public BuffAtributesHolder buffAtributesHolder;
 
     private SpriteRenderer sprite;
 
@@ -34,12 +35,10 @@ public class PlayerBehaviour : MonoBehaviour
     private bool isPlaying = true;
     private ColorSO newColor;
     private float border;
+
+    public AbstractBuff currentBuff = null;
     private void Awake()
     {
-        Vector3[] worldCorners = new Vector3[4];
-        canvas.GetWorldCorners(worldCorners);
-        border = worldCorners[2].x + borderOffset;
-
         rb = GetComponent<Rigidbody2D>();
         sprite = GetComponentInChildren<SpriteRenderer>();
 
@@ -55,12 +54,20 @@ public class PlayerBehaviour : MonoBehaviour
 
         // Stops detecting collisions when game is over
         timer.OnGameOver += (() => { isPlaying = false; });
+
+        Vector3 worldCorners = UIScreenBoundries.Instance.GetBoundries();
+        border = worldCorners.x + borderOffset;
     }
     private void Update()
     {
         if(transform.position != targetPosition)
         {
             rb.MovePosition(targetPosition);
+        }
+
+        if(currentBuff != null)
+        {
+            currentBuff.UpdateBuff(this);
         }
     }
     public void SetTargetPosition(float xPosition)
@@ -73,17 +80,29 @@ public class PlayerBehaviour : MonoBehaviour
     {
         if (!isPlaying) return;
 
-        // If color is the same as the bucket - collect shape
-        if(collision.GetComponent<ShapeBehaiviour>().GetColorSO() == currentColor)
+        if (collision.CompareTag("Shapes"))
         {
-            OnColorCollect?.Invoke(true);
-            SoundsHandler.PlaySFX(CorrectCollectSFX, 1f);
+            ColorSO shapeColor = collision.GetComponent<ShapeBehaiviour>().GetColorSO();
+            // If color is the same as the bucket - collect shape
+            if (shapeColor == currentColor || shapeColor.nameString == "Rainbow")
+            {
+                OnColorCollect?.Invoke(true);
+                SoundsHandler.PlaySFX(CorrectCollectSFX, 1f);
+            }
+            else
+            {
+                OnColorCollect?.Invoke(false);
+                SoundsHandler.PlaySFX(WrongCollectSFX, 1f);
+            }
         }
-        else
+        else if(collision.CompareTag("Buff"))
         {
-            OnColorCollect?.Invoke(false);
-            SoundsHandler.PlaySFX(WrongCollectSFX, 1f);
+            currentBuff = collision.GetComponent<BuffHolder>().GetBuff();
+            currentBuff.PickUp(this);
+
+            Destroy(collision.gameObject);
         }
+        
 
         Destroy(collision.gameObject);
     }
@@ -121,5 +140,9 @@ public class PlayerBehaviour : MonoBehaviour
     public ColorSO GetColor()
     {
         return currentColor;
+    }
+    public Transform GetTransform()
+    {
+        return transform;
     }
 }

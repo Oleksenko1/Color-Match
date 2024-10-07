@@ -6,11 +6,11 @@ using Zenject;
 
 public class ShapeSpawner : MonoBehaviour
 {
+    public static ShapeSpawner Instance;
     [Header("Stats")]
     [SerializeField] private float spawnDelay;
     [SerializeField] private float shapeSpeed = 2.25f;
     [Space(15)]
-    [SerializeField] private RectTransform rt;
     [SerializeField] private List<Transform> shapeList;
     [SerializeField] private ColorsListSO colorList;
     [Header("Difficulty increase amount")]
@@ -23,6 +23,11 @@ public class ShapeSpawner : MonoBehaviour
     private float xBoundry;
     private float yBoundry;
 
+    private bool isSpaningRainbow = false;
+    private void Awake()
+    {
+        Instance = this;
+    }
     private void Start()
     {
         // Increasing spawn and shape speed depending on a difficulty level
@@ -44,7 +49,8 @@ public class ShapeSpawner : MonoBehaviour
             yield return new WaitForSeconds(spawnDelay);
 
             Vector3 position = RandomPosition();
-            ColorSO color = colorList.list[Random.Range(0, colorList.list.Count)];
+
+            ColorSO color = isSpaningRainbow? colorList.rainbowColor : colorList.list[Random.Range(0, colorList.list.Count)];
             Transform prefab = shapeList[Random.Range(0, shapeList.Count - 1)];
 
             ShapeBehaiviour.CreateShape(position, color, prefab, shapeSpeed);
@@ -52,14 +58,13 @@ public class ShapeSpawner : MonoBehaviour
     }
     private void CalculateScreenBoundries()
     {
-        Vector3[] screenBoundries = new Vector3[4];
-        rt.GetWorldCorners(screenBoundries);
+        Vector3 screenBoundries = UIScreenBoundries.Instance.GetBoundries();
 
         float xOffset = 0.4f; 
-        xBoundry = screenBoundries[2].x - xOffset;
+        xBoundry = screenBoundries.x - xOffset;
 
         float yOffset = 1f;
-        yBoundry = screenBoundries[1].y + yOffset;
+        yBoundry = screenBoundries.y + yOffset;
     }
 
     private Vector3 RandomPosition()
@@ -69,8 +74,8 @@ public class ShapeSpawner : MonoBehaviour
         return rndPos;
     }
 
-    private void StopSpawning()
+    public void SpawnRainbowShapes(bool b)
     {
-        isSpawning = false;
+        isSpaningRainbow = b;
     }
 }
