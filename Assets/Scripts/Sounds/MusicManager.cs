@@ -12,16 +12,28 @@ public class MusicManager : MonoBehaviour
     [SerializeField] private AudioMixerSnapshot volumeOffSnapshot;
 
     [Inject]
-    private UITimer gameoverScript;
+    private UITimer timer;
+    [Inject]
+    private UIHearts hearts;
     private void Awake()
     {
         Instance = this;
     }
     private void Start()
     {
-        if(gameoverScript != null)
+        int gamemode = PlayerPrefs.GetInt("GameMode", 0);
+
+        if (timer != null && hearts != null)
         {
-            gameoverScript.OnGameOver += SilenceMusic;
+            switch(gamemode)
+            {
+                case 0:
+                    timer.OnGameOver += SilenceMusic;
+                    break;
+                case 1:
+                    hearts.OnGameOver += SilenceMusic;
+                    break;
+            }
         }
 
         defaultSnapshot.TransitionTo(1f);

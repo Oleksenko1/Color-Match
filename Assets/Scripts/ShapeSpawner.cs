@@ -16,17 +16,29 @@ public class ShapeSpawner : MonoBehaviour
     [Header("Difficulty increase amount")]
     [SerializeField] private float spawnDelayIncrease = 0.15f;
     [SerializeField] private float shapeSpeedIncrease = 0.75f;
+    [Header("For endless mode")]
+    [SerializeField] private float targetMultipiler = 1.5f;
+    [SerializeField] private float delayToTargetMult = 100f;
 
     [Inject] private UITimer timer;
+    [Inject] private UIHearts hearts;
 
     private bool isSpawning = true;
     private float xBoundry;
     private float yBoundry;
 
     private bool isSpaningRainbow = false;
+
+    private float currentMultEndlessMode = 1f;
+    private int gamemode;
+
+    private float difficultyRiseTimer = 0f;
+
     private void Awake()
     {
         Instance = this;
+
+        gamemode = PlayerPrefs.GetInt("GameMode", 0); 
     }
     private void Start()
     {
@@ -40,20 +52,44 @@ public class ShapeSpawner : MonoBehaviour
         StartCoroutine(ShapeSpawnCoroutine());
 
         // Stops spawning when game is over
+        int gamemode = PlayerPrefs.GetInt("GameMode", 0);
+
+        if (timer != null && hearts != null)
+        {
+            switch (gamemode)
+            {
+                case 0:
+                    timer.OnGameOver += (() => { isSpawning = false; });
+                    break;
+                case 1:
+                    hearts.OnGameOver += (() => { isSpawning = false; });
+                    break;
+            }
+        }
+
         timer.OnGameOver += (() => { isSpawning = false; });
     }
     IEnumerator ShapeSpawnCoroutine()
     {
         while (isSpawning)
         {
-            yield return new WaitForSeconds(spawnDelay);
+            float delay = spawnDelay / currentMultEndlessMode;
+
+            yield return new WaitForSeconds(delay);
+
+            // Increase difficulty if in endless mode
+            if(gamemode == 1 && delayToTargetMult > difficultyRiseTimer)
+            {
+                difficultyRiseTimer += delay;
+                currentMultEndlessMode = Mathf.Lerp(1f, targetMultipiler, difficultyRiseTimer / delayToTargetMult);
+            }
 
             Vector3 position = RandomPosition();
 
             ColorSO color = isSpaningRainbow? colorList.rainbowColor : colorList.list[Random.Range(0, colorList.list.Count)];
             Transform prefab = shapeList[Random.Range(0, shapeList.Count - 1)];
 
-            ShapeBehaiviour.CreateShape(position, color, prefab, shapeSpeed);
+            ShapeBehaiviour.CreateShape(position, color, prefab, shapeSpeed * currentMultEndlessMode);
         }
     }
     private void CalculateScreenBoundries()

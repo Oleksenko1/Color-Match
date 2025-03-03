@@ -11,7 +11,6 @@ public class UITimer : MonoBehaviour
     [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private int timeAmount = 80;
     [Header("SFX")]
-    [SerializeField] private AudioClip gameoverSFX;
     [SerializeField] private AudioClip beepSFX;
 
     private int currentTime;
@@ -22,6 +21,12 @@ public class UITimer : MonoBehaviour
         text.SetText(currentTime.ToString());
 
         StartCoroutine(CountdownCoroutine());
+
+        // Turns off timer if gamemode is not Time mode
+        if(PlayerPrefs.GetInt("GameMode", 0) == 1)
+        {
+            gameObject.SetActive(false);
+        }
     }
 
     IEnumerator CountdownCoroutine()
@@ -42,7 +47,6 @@ public class UITimer : MonoBehaviour
         }
 
         OnGameOver?.Invoke();
-        SoundsHandler.PlaySFX(gameoverSFX, 1f);
     }
 
 }

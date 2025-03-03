@@ -9,10 +9,13 @@ public class UIMenuSettingsPanel : MonoBehaviour
     [Tooltip("Put the buttons in ascending order of their difficulty")]
     [SerializeField] private List<Button> difficultyList;
     [Space(10)]
+    [SerializeField] private Toggle vibrationToggle;
+    [Space(10)]
     [SerializeField] private Button closeBtn;
     [Header("SFX")]
     [SerializeField] private AudioClip closeSFX;
     [SerializeField] private AudioClip difficultyChangeSFX;
+    [SerializeField] private AudioClip basicSFX;
 
     private int currentDifficulty;
     private void Awake()
@@ -31,6 +34,16 @@ public class UIMenuSettingsPanel : MonoBehaviour
         }
 
         ChooseNewDifficulty(currentDifficulty);
+
+        // Adds event to a vibration toggle
+        vibrationToggle.isOn = PlayerPrefs.GetInt("IsVibrationOn", 1) == 1;
+        vibrationToggle.onValueChanged.AddListener((bool b) =>
+        {
+            int toggleValue = b ? 1 : 0;
+            PlayerPrefs.SetInt("IsVibrationOn", toggleValue);
+
+            SoundsHandler.PlaySFX(basicSFX, 1f);
+        });
 
         // Adds event to a close button
         closeBtn.onClick.AddListener(() =>

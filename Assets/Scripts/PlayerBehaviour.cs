@@ -26,6 +26,7 @@ public class PlayerBehaviour : MonoBehaviour
     private SpriteRenderer sprite;
 
     [Inject] private UITimer timer;
+    [Inject] private UIHearts hearts;
 
     private ColorSO currentColor;
 
@@ -53,14 +54,24 @@ public class PlayerBehaviour : MonoBehaviour
         StartCoroutine(ColorChangeCoroutine());
 
         // Stops detecting collisions when game is over
-        timer.OnGameOver += (() => { isPlaying = false; });
+        int gamemode = PlayerPrefs.GetInt("GameMode", 0);
+        switch (gamemode)
+        {
+            case 0:
+                timer.OnGameOver += (() => { isPlaying = false; });
+                break;
+
+            case 1:
+                hearts.OnGameOver += (() => { isPlaying = false; });
+                break;
+        }
 
         Vector3 worldCorners = UIScreenBoundries.Instance.GetBoundries();
         border = worldCorners.x + borderOffset;
     }
     private void Update()
     {
-        if(transform.position != targetPosition)
+        if(transform.position != targetPosition &&  isPlaying)
         {
             rb.MovePosition(targetPosition);
         }
@@ -93,6 +104,10 @@ public class PlayerBehaviour : MonoBehaviour
             {
                 OnColorCollect?.Invoke(false);
                 SoundsHandler.PlaySFX(WrongCollectSFX, 1f);
+
+                // Vibrates device
+                if(PlayerPrefs.GetInt("IsVibrationOn", 1) == 1)
+                    Vibration.Vibrate(500);
             }
         }
         else if(collision.CompareTag("Buff"))
@@ -106,13 +121,12 @@ public class PlayerBehaviour : MonoBehaviour
 
         Destroy(collision.gameObject);
     }
-
     IEnumerator ColorChangeCoroutine()
     {
         while (isPlaying)
         {
             yield return new WaitForSeconds(colorChangeDelay - colorChangeCautionTime);
-            OnColorChangeCaution?.Invoke();
+            if(isPlaying) OnColorChangeCaution?.Invoke();
 
             yield return new WaitForSeconds(colorChangeCautionTime);
             int index;

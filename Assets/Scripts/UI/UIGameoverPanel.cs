@@ -16,19 +16,38 @@ public class UIGameoverPanel : MonoBehaviour
     [Header("SFX")]
     [SerializeField] private AudioClip playSFX;
     [SerializeField] private AudioClip toMenuSFX;
+    [SerializeField] private AudioClip winSFX;
 
     [Inject] private UITimer timerScript;
     [Inject] private UIScore scoreScript;
+    [Inject] private UIHearts heartsScript;
 
     private bool isNewRecord = false;
+    int gamemode;
     private void Start()
     {
-        timerScript.OnGameOver += ShowPanel;
+        gamemode = PlayerPrefs.GetInt("GameMode", 0);
+        switch (gamemode)
+        {
+            // Timer mode
+            case 0:
+                timerScript.OnGameOver += ShowPanel;
+                break;
+
+            // Endless mode
+            case 1:
+                heartsScript.OnGameOver += OpenPanelWithDelay;
+                break;
+        }
 
         InitializeButtons();
 
         gameObject.SetActive(false);
         newRecordText.SetActive(false);
+    }
+    private void OpenPanelWithDelay()
+    {
+        Invoke(nameof(ShowPanel), 1.5f);
     }
     private void InitializeButtons()
     {
@@ -53,14 +72,15 @@ public class UIGameoverPanel : MonoBehaviour
 
     private void ShowPanel()
     {
+        SoundsHandler.PlaySFX(winSFX, 1f);
         // Sets score amount
         int currentScore = scoreScript.GetScore();
         scoreAmountText.SetText(currentScore.ToString());
 
         // Sets high score
-        if(currentScore > HighscoreHandler.GetHighScore()) 
+        if(currentScore > HighscoreHandler.GetHighScore(gamemode)) 
         { 
-            HighscoreHandler.SetHighscore(currentScore);
+            HighscoreHandler.SetHighscore(currentScore, gamemode);
             isNewRecord = true;
             newRecordText.SetActive(true);
         }

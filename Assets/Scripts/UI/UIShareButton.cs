@@ -11,11 +11,14 @@ public class UIShareButton : MonoBehaviour
     private string shareMessage;
     public void ClickShareButton()
     {
+        int gamemode = PlayerPrefs.GetInt("GameMode", 0);
+
+        string mode = gamemode == 0 ? "Time mode \uD83D\uDD50" : "Endless mode \u221E";
         int score = scoreScript.GetScore();
 
-        string regularScore = $"I just scored {score} points in Color Match! Can you beat my score? \uD83C\uDF08\u2728 #ColorMatch" + 
+        string regularScore = $"I just scored {score} points in Color Match {mode}! Can you beat my score? \uD83C\uDF08\u2728 #ColorMatch" + 
                                 "\nDownload: https://terrintin.itch.io/color-match";
-        string newRecord = $"New high score in Color Match: {score} points! I'm the ultimate color master! \uD83C\uDF08\uD83C\uDFC6 #ColorMatch" +
+        string newRecord = $"New high score in Color Match {mode}: {score} points! I'm the ultimate color master! \uD83C\uDF08\uD83C\uDFC6 #ColorMatch" +
                                 "\nDownload: https://terrintin.itch.io/color-match";
 
         shareMessage = gameoverPanel.IsNewRecord() ? newRecord : regularScore;

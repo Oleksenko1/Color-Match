@@ -17,9 +17,12 @@ public class UIScore : MonoBehaviour
     private int currentScore = 0;
 
     private bool isMultiplied = false;
+    private int gamemode;
     private void Awake()
     {
         Instance = this;
+
+        gamemode = PlayerPrefs.GetInt("GameMode", 0);
     }
     private void Start()
     {
@@ -36,11 +39,13 @@ public class UIScore : MonoBehaviour
         }
         else
         {
-            currentScore -= scoreReduce;
+            // Reduce score if in timer game mode
+            if(gamemode == 0)
+                currentScore -= scoreReduce;
         }
 
         // Clamps score, so it doesn't go lower 0
-        currentScore = Mathf.Clamp(currentScore, 0, 9999);
+        currentScore = Mathf.Clamp(currentScore, 0, 9999999);
 
         SetText();
     }

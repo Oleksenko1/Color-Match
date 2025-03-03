@@ -64,8 +64,6 @@ public class BuffSpawner : MonoBehaviour
 
     private void SpawnBuff()
     {
-        Debug.Log("Buff spawned");
-
         GameObject randBuf = buffList[Random.Range(0, buffList.Count)];
 
         Vector3 randPos = new Vector3(Random.Range(-xBoundry, xBoundry), yBoundry);

@@ -7,7 +7,8 @@ using TMPro;
 public class UIMainMenu : MonoBehaviour
 {
     [Header("Text fields")]
-    [SerializeField] private TextMeshProUGUI highScoreTxt;
+    [SerializeField] private TextMeshProUGUI timerHighScoreTxt;
+    [SerializeField] private TextMeshProUGUI endlessHighScoreTxt;
     [Header("Buttons")]
     [SerializeField] private Button playBtn;
     [SerializeField] private Button settingsBtn;
@@ -18,11 +19,13 @@ public class UIMainMenu : MonoBehaviour
     [SerializeField] private AudioClip exitSFX;
     [Header("Other")]
     [SerializeField] private UIMenuSettingsPanel settings;
+    [SerializeField] private UIGamemodeChoose gamemodePanel;
 
     private void Awake()
     {
         // Setting highest score amount
-        highScoreTxt.SetText(HighscoreHandler.GetHighScore().ToString());
+        timerHighScoreTxt.SetText(HighscoreHandler.GetHighScore(0).ToString());
+        endlessHighScoreTxt.SetText(HighscoreHandler.GetHighScore(1).ToString());
     }
     private void Start()
     {
@@ -33,10 +36,8 @@ public class UIMainMenu : MonoBehaviour
         // Play button behaviour
         playBtn.onClick.AddListener(() =>
         {
-            SoundsHandler.PlaySFX(playSFX, 1f);
-            UILoadingScreen.Instance.PlayLoadIn();
-            MusicManager.Instance.TurnOffVolume();
-            Invoke("PlayButton", 1f);
+            SoundsHandler.PlaySFX(uiSFX, 1f);
+            gamemodePanel.Open();
         });
 
         // Settings button behaviour
@@ -54,10 +55,6 @@ public class UIMainMenu : MonoBehaviour
             MusicManager.Instance.TurnOffVolume();
             Invoke("ExitButton", 1f);
         });
-    }
-    private void PlayButton()
-    {
-        GameSceneLoader.LoadScene(GameSceneLoader.Scenes.GameScene);
     }
     private void ExitButton()
     {
